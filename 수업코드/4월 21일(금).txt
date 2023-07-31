@@ -1,0 +1,282 @@
+4월 21일(금)
+
+1) 오라클 설치 확인
+   - 삭제: 
+		제어판 - 추가/제거
+		레지스트리 삭제
+  		
+2) 구동 중인지 확인
+   "컴퓨터 관리"
+	   ServiceXE 구동
+   	TNSListener 구동
+==========================
+관리자 계정    system/system
+               sys/system
+일반 계정      hr/hr   - 설치 초반에는 Lock 상태
+ - system 계정으로 접속한 후 hr계정의 Lock 해제
+ 
+
+
+   > sqlplus system/system
+
+   > conn system/system   ===> system 계정으로 접속
+   > conn / as sysdba     ===> sys 계정으로 접속 
+   > show user
+
+
+   // SQL 명령 ==> ;으로 끝나야 함
+
+   > alter user hr account unlock;
+   > alter user hr identified by hr;
+	> alter user hr identified by hr account unlock; // 두 명령을 한 번에
+
+- 오라클의 Object 종류
+  table, user, index, sequence, synonym, view
+
+- RDBMS의 명령군의 종류
+ 1) DDL (Database Definition Language) : 객체를 다루는 명령
+		create(생성), alter(변경), drop(삭제)
+
+ 2) DML (Database Manipulation Language) : 테이블의 레코드를 다루는 명령
+		insert(삽입), update(수정), delete(삭제), select(조회)
+
+ 3) DCL (Database Control Language) : 유저의 권한을 다루는 명령
+		grant(부여), revoke(권한 회수)
+
+ 4) TCL (Transaction Control Language) : 트랜잭션을 다루는 명령
+ 		commit(저장), rollback(되돌림)
+
+
+*** 제약조건(constraint)
+1) Primary key (주키)
+2) Foreign Key (외래키) - 관계 설정을 위해 필요 (참조 무결성)
+    delete cascade
+3) Unique   - 유일한 값을 갖도록
+4) Not Null - 빈 값이 아는 것
+5) Check    - 데이터의 값을 한정시키는 용도 (부동산, 성별, 학년)
+   default  - 데이터가 없을 때 삽입되는 기본값
+
+*** select
+- SELECT 문법
+
+  SELECT [ALL | DISTINCT] 컬럼명,... 
+  FROM 테이블명
+  WHERE 조건절
+  ORDER BY 컬럼명 [ASC | DESC] ;   			-- (정렬) 무조건 문장의 끝에 있어야 함
+
+
+[실습]
+> SELECT DISTINCT DEPARTMENT_ID FROM EMPLOYEES; -- 중복 배제
+
+> SELECT DISTINCT DEPARTMENT_ID 
+  FROM EMPLOYEES
+  ORDER BY DEPARTMENT_ID;
+
+
+-- 이름, 급여, 부서번호를 이름순으로 오름차순해서 조회
+
+> SELECT FIRST_NAME, SALARY, DEPARTMENT_ID
+  FROM EMPLOYEES
+  ORDER BY FIRST_NAME;  
+
+-- 별칭을 붙여서 조회하기
+   컬럼명 옆에 ALIAS 별칭을 붙임
+
+> SELECT FIRST_NAME AS "이름 ♥", SALARY AS "급 여", DEPARTMENT_ID 부서번호
+  FROM EMPLOYEES
+  ORDER BY FIRST_NAME;  
+
+예정 : 목요일까지 Oracle / 금요일(오전) 자바 - 풀이 + 오라클
+       5월 4일, 5월 8일(월) Mybatis
+       5월 9일 ~ 5월 19일 : HTML + CSS + JS
+       5월 22일 ~ Spring : 한달 간  ==> 스프링 + 1차 프로젝트
+       6월 중순경 : 2차 프로젝트 기간
+       7월 17일 : 2차 프로젝트 발표
+       7월 19일 : 수료식
+     
+
+*** 연산자
+1) 산술연산자 :  + - * /
+2) 문자열 결합 연산자 :  || 
+3) 비교연산자 : =  !=  >   <    >=   <=    : WHERE 뒤 조건에 쓰임
+4) 논리연산자 : AND  OR   NOT
+5) NULL 연산자 : IS NULL, IS NOT NULL : NULL은 비교연산자 사용 불가
+6) SQL 연산자  : 컬럼명 BETWEEN a AND b, 컬럼명 IN (값, 값)
+7) LIKE 연산자와 와일드 카드
+   *  : 컬럼명 대신 (모든 컬럼을 의미)
+   %  : 문자를 대신 (문자 여러글자)
+   _  : 문자 한 개   ( _ 하나당 글자 하나)
+
+
+-- [문제] 직원의 급여의 5%를 보너스로 지급하려고 한다.
+--        직원의 사원번호, 이름, 급여, 보너스, 합계를 조회하시오
+
+> SELECT EMPLOYEE_ID, FIRST_NAME, SALARY, SALARY*0.05, SALARY + SALARY*0.05 
+  FROM EMPLOYEES;
+
+-- 직원명 뒤에 '님' 문자를 붙여서 조회하시오
+> SELECT FIRST_NAME || '님'
+  FROM EMPLOYEES;
+
+-- '이름 성'을 붙여서 조회하시오
+> SELECT FIRST_NAME || ' ' || LAST_NAME
+  FROM EMPLOYEES;
+
+-- 급여가 10000 이상인 사람들의 사원번호, 이름, 급여, 직급을 조회하시오
+> SELECT EMPLOYEE_ID, FIRST_NAME, SALARY, JOB_ID
+  FROM EMPLOYEES
+  WHERE SALARY >= 10000;
+
+-- 급여가 10000 이상인 사람들의 사원번호, 이름, 급여, 직급을 
+   급여가 많은 순으로 조회하시오
+> SELECT EMPLOYEE_ID, FIRST_NAME, SALARY, JOB_ID
+  FROM EMPLOYEES
+  WHERE SALARY >= 10000
+  ORDER BY SALARY DESC;
+
+-- 사원번호, 이름, 급여, 부서번호를 조회. 부서번호가 80번인 데이터를 조회
+> SELECT EMPLOYEE_ID, FIRST_NAME, SALARY, DEPARTMENT_ID
+  FROM EMPLOYEES
+  WHERE DEPARTMENT_ID = 80;
+
+-- 급여가 5000~10000 이상인 사람들의 사원번호, 이름, 급여, 직급을 조회하시오
+> SELECT EMPLOYEE_ID, FIRST_NAME, SALARY, JOB_ID
+  FROM EMPLOYEES
+  WHERE SALARY >= 5000 AND SALARY <= 10000;
+
+-- 부서번호가 10이거나 50인 부서에 속한 직원들의 이름, 부서번호를 조회하시오.
+> SELECT FIRST_NAME, DEPARTMENT_ID
+  FROM EMPLOYEES
+  WHERE DEPARTMENT_ID = 10 OR DEPARTMENT_ID = 50;
+
+-- 부서번호가 10이나 50이 아닌 부서에 속한 직원들의 이름, 부서번호를 조회하시오.
+> SELECT FIRST_NAME, DEPARTMENT_ID
+  FROM EMPLOYEES
+  WHERE NOT(DEPARTMENT_ID = 10 OR DEPARTMENT_ID = 50);
+
+-- 위의 코드를 부서별로 오름차순 정렬
+> SELECT FIRST_NAME, DEPARTMENT_ID
+  FROM EMPLOYEES
+  WHERE NOT(DEPARTMENT_ID = 10 OR DEPARTMENT_ID = 50)
+  ORDER BY DEPARTMENT_ID;   -- 컬럼의 순서 1 혹은 2를 사용할 수 있다.
+
+-- 이름, 급여, 커미션을 조회하시오
+> SELECT FIRST_NAME, SALARY, COMMISSION_PCT
+  FROM EMPLOYEES;
+
+-- 이름, 급여, 커미션을 조회하시오 (커미션을 받는 사람)
+> SELECT FIRST_NAME, SALARY, COMMISSION_PCT
+  FROM EMPLOYEES
+  WHERE COMMISSION_PCT != NULL;  (X)
+
+> SELECT FIRST_NAME, SALARY, COMMISSION_PCT
+  FROM EMPLOYEES
+  WHERE COMMISSION_PCT IS NOT NULL;   (O)
+
+-- 매니저가 없는 직원의 이름, 직급을 조회하시오.
+> SELECT FIRST_NAME, JOB_ID
+  FROM EMPLOYEES
+  WHERE MANAGER_iD IS NOT NULL;
+
+-- 이름, 급여, 커미션금액, 총수령액을 조회 (단, 커미션이 있는 사람)
+> SELECT FIRST_NAME, SALARY, COMMISSION_PCT*SALARY AS "커미션 금액", 
+			 SALARY + COMMISSION_PCT*SALARY AS "총수령액"
+  FROM EMPLOYEES
+  WHERE MANAGER_iD IS NOT NULL;
+
+-- 급여가 10000~15000 사이인 직원의 이름, 급여를 조회
+> SELECT FIRST_NAME, SALARY
+  FROM EMPLOYEES
+  WHERE SALARY BETWEEN 10000 AND 15000;
+
+-- 부서번호가 10이거나 50인 부서에 속한 직원들의 이름, 부서번호를 조회하시오.
+> SELECT FIRST_NAME, DEPARTMENT_ID
+  FROM EMPLOYEES
+  WHERE DEPARTMENT_ID IN (10, 20);
+
+-- 급여가 7000을 초과하고 이메일이 'SKING' 인 직원의 이름, 전화번호, 이메일 조회
+> SELECT FIRST_NAME, PHONE_NUMBER, EMAIL
+  FROM EMPLOYEES
+  WHERE SALARY > 7000 AND EMAIL = 'SKING';
+
+-- 직원의 이름과 입사일을 조회하시오
+> SELECT FIRST_NAME, HIRE_DATE
+  FROM EMPLOYEES;
+
+-- 직원의 이름과 입사일을 조회하시오. (입사일 순)
+> SELECT FIRST_NAME, HIRE_DATE
+  FROM EMPLOYEES
+  ORDER BY HIRE_DATE;
+
+-- 직원의 이름과 입사일 07년도에 입사한 사람만 조회 '07/01/01'~'07/12/31'
+   (입사일 순)
+> SELECT FIRST_NAME, HIRE_DATE
+  FROM EMPLOYEES
+  WHERE HIRE_DATE BETWEEN '07/01/01' AND '07/12/31'
+  ORDER BY HIRE_DATE;
+
+-- 직원의 이름과 입사일 07년도에 이전에 입사한 사람만 조회
+   (입사일 순)
+> SELECT FIRST_NAME, HIRE_DATE
+  FROM EMPLOYEES
+  WHERE HIRE_DATE < '07/01/01' 
+  ORDER BY HIRE_DATE;
+
+-- 날짜 데이터를 산술연산?
+> SELECT FIRST_NAME, HIRE_DATE, HIRE_DATE+1   -- 일이 더해짐
+  FROM EMPLOYEES;
+
+-- 직원의 이름이 'J'로 시작하는 직원을 조회 (직원명)
+> SELECT FIRST_NAME
+  FROM EMPLOYEES
+  WHERE FIRST_NAME LIKE 'J%';
+
+-- 직원의 이름이 'n'로 끝나는 직원을 조회 (직원명)
+> SELECT FIRST_NAME
+  FROM EMPLOYEES
+  WHERE FIRST_NAME LIKE '%n';
+
+-- 직원의 이름이 'n'로 끝나면서 이름의 길이가 5인 직원을 조회 (직원명)
+> SELECT FIRST_NAME
+  FROM EMPLOYEES
+  WHERE FIRST_NAME LIKE '____n';
+
+
+-- 직원의 이름과 입사일 07년도에 입사한 사람만 조회 LIKE 이용
+   (입사일 순)
+> SELECT FIRST_NAME, HIRE_DATE
+  FROM EMPLOYEES
+  WHERE HIRE_DATE LIKE '07%'
+  ORDER BY HIRE_DATE;
+
+-- 직원의 이름과 입사일 1월에 입사한 사람만 조회 LIKE 이용
+   (입사일 순)
+> SELECT FIRST_NAME, HIRE_DATE
+  FROM EMPLOYEES
+  WHERE HIRE_DATE LIKE '___01___'
+  ORDER BY HIRE_DATE;
+
+
+-- 매니저가 103인 직원의 정보(아이디, 이름, 부서, 매니저번호)를 조회하시오.
+
+-- 어느 부서에도 속하지 않은 직원의 정보 (이름, 전화번호, 부서)를 조회하시오
+
+-- 급여가 10000을 초과하면서 JOB_ID가 'SA_REP'인 사람의 
+   이메일, 이름, 전화번호, JOB_ID 정보를 조회하시오
+
+-- 부서가 60이거나 이름이 A로 시작하는 시작하는 직원의 정보(이름, 급여, 부서)를 
+   조회하시오.
+
+-- 부서가 10이거나 50이거나 60번 부서의 직원의 정보(이름, 급여, 부서)를 조회하시오
+
+-- 이름이 3글자인 모든 사람의 정보를 조회하시오.
+
+-- 전체 직원들중 직급이 'CLERK' 들을 조회 (종류가 많음)
+
+
+
+
+
+
+
+
